@@ -1,10 +1,10 @@
-import React from 'react';
-import { useEffect, useState, useRef } from 'react';
-import './style.css';
-import CurrentPlayingSong from './components/CurrentPlayingSong';
-import SpotifyLogo from './components/SpotifyLogo';
-import Queue from './components/queue/Queue';
-import SongItem from './components/SongItem/SongItem';
+import React from "react";
+import { useEffect, useState, useRef } from "react";
+import "./style.css";
+import CurrentlyPlaying from "./components/CurrentlyPlaying";
+import SpotifyLogo from "./components/SpotifyLogo";
+import Queue from "./components/Queue";
+import SongItem from "./components/SongItem";
 
 //Spotify Web API credentials
 //Client ID Prod: 07fcc0c7be2b4a2db69a663f8dd67b0e Dev: 6c76143fe7c34632a15eb0bb3d95e664
@@ -14,8 +14,9 @@ export default function App() {
   const clientID = "6c76143fe7c34632a15eb0bb3d95e664";
   const redirectUri = "http://localhost:4000";
   const authEndpoint = "https://accounts.spotify.com/authorize";
-  const responseType = "token"; 
-  const scope = "user-read-currently-playing user-read-playback-state user-modify-playback-state";
+  const responseType = "token";
+  const scope =
+    "user-read-currently-playing user-read-playback-state user-modify-playback-state";
 
   const [token, setToken] = useState("");
   const [site, setSite] = useState("login");
@@ -31,23 +32,25 @@ export default function App() {
     let token = window.localStorage.getItem("token");
 
     if (!token && hash) {
-        token = hash.substring(1).split("&").find(elem => elem.startsWith("access_token")).split("=")[1];
+      token = hash
+        .substring(1)
+        .split("&")
+        .find((elem) => elem.startsWith("access_token"))
+        .split("=")[1];
 
-        window.location.hash = "";
-        window.localStorage.setItem("token", token);
+      window.location.hash = "";
+      window.localStorage.setItem("token", token);
     }
     setToken(token);
-    if(!!token) {
+    if (!!token) {
       setSite("index");
     }
   }, []);
 
   useEffect(() => {
-    if(!!token) {
-      Promise.all([
-        getCurrentQueueData(),
-      ]).then((result) => {
-        if(!!result[0]) {
+    if (!!token) {
+      Promise.all([getCurrentQueueData()]).then((result) => {
+        if (!!result[0]) {
           setActPlaylistID(result[0]?.playlistUri?.split(":")[2]);
           setActSong(result[0]?.currentSong);
           setQueue(result[0]?.queue);
@@ -59,11 +62,9 @@ export default function App() {
   });
 
   useEffect(() => {
-    if(!!token) {
-      Promise.all([
-        getCurrentPlaylist(),
-      ]).then((result) => {
-        if(!!result[0]) {
+    if (!!token) {
+      Promise.all([getCurrentPlaylist()]).then((result) => {
+        if (!!result[0]) {
           setActPlaylist(result[0]);
         }
       });
@@ -74,154 +75,186 @@ export default function App() {
 
   const getCurrentQueueData = async () => {
     await sleep(1000);
-    const result = await fetch('https://api.spotify.com/v1/me/player/queue', {   
-      method: 'GET',
+    const result = await fetch("https://api.spotify.com/v1/me/player/queue", {
+      method: "GET",
       headers: {
-        Authorization: `Bearer ${token}`
-      }
+        Authorization: `Bearer ${token}`,
+      },
     }).catch(console.error);
-    if(result.status === 200) {
+    if (result.status === 200) {
       const data = await result.json();
       const playlistUri = await getCurrentPlayingContext();
       return {
         currentSong: data?.currently_playing,
         playlistUri: playlistUri,
-        queue: data?.queue
+        queue: data?.queue,
       };
     }
-  }
+  };
 
   const getCurrentPlayingContext = async () => {
-    const result = await fetch('https://api.spotify.com/v1/me/player/currently-playing', {   
-      headers: {
-        Authorization: `Bearer ${token}`
+    const result = await fetch(
+      "https://api.spotify.com/v1/me/player/currently-playing",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       }
-    }).catch(console.error);
-    if(result.status === 200) {
+    ).catch(console.error);
+    if (result.status === 200) {
       const data = await result.json();
-      return data?.context.uri;
+      return data?.context?.uri;
     }
-  }
+  };
 
   const getCurrentPlaylist = async () => {
-    const result = await fetch(`https://api.spotify.com/v1/playlists/${actPlaylistID}`, {   
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${token}`
+    const result = await fetch(
+      `https://api.spotify.com/v1/playlists/${actPlaylistID}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       }
-    }).catch(console.error);
-    if(result.status === 200) {
+    ).catch(console.error);
+    if (result.status === 200) {
       const data = await result.json();
       return data;
     }
-  }
+  };
 
   const search = async (e) => {
     e.preventDefault();
     const searchKey = searchKeyRef.current.value;
-    const result = await fetch('https://api.spotify.com/v1/search?q=' + searchKey + '&type=track&limit=20', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
+    const result = await fetch(
+      "https://api.spotify.com/v1/search?q=" +
+        searchKey +
+        "&type=track&limit=20",
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
       }
-    });
+    );
     const data = await result.json();
     const songs = data?.tracks?.items;
     const foundSongs = [];
 
-    if(!!songs) {
+    if (!!songs) {
       songs.forEach((song) => {
         const addSong = {
           id: song.id,
           name: song.name,
           artists: song.artists,
-          image: song.album.images[0]
+          image: song.album.images[0],
         };
         foundSongs.push(addSong);
       });
-    } 
-    setSearchResult(foundSongs);   
-  }
+    }
+    setSearchResult(foundSongs);
+  };
 
   const addToQueue = (songID) => {
-    fetch(`https://api.spotify.com/v1/me/player/queue?uri=spotify:track:${songID}`, {   
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`
+    fetch(
+      `https://api.spotify.com/v1/me/player/queue?uri=spotify:track:${songID}`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       }
-    }).catch(console.error);
-  }
+    ).catch(console.error);
+  };
 
   const renderSongs = () => {
-    if(!!searchResult) {
-      return searchResult.map(song => (
-        <SongItem song={song} button={true} playingAnimation={false} queueFunction={addToQueue} imageUrl={song.image.url} />
+    if (!!searchResult) {
+      return searchResult.map((song) => (
+        <SongItem
+          song={song}
+          button={true}
+          playingAnimation={false}
+          queueFunction={addToQueue}
+          imageUrl={song.image.url}
+        />
       ));
     }
-  }
+  };
 
   const logout = () => {
     setToken("");
     setSite("login");
     window.localStorage.removeItem("token");
-  }
+  };
 
   const sleep = (ms) => {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  };
 
-  switch(site) {
+  switch (site) {
     case "login": {
       return (
-        <div className="login"> 
+        <div className="login">
           <div className="login-contents">
             <h1 id="login-title">Partify.</h1>
-            {!token && 
-              <a className ="href-button" href={`${authEndpoint}?client_id=${clientID}&redirect_uri=${redirectUri}&scope=${scope}&response_type=${responseType}`}>Login to Spotify</a>}  
-            <p id="login-text">(You need Spotify Premium subscription to proceed)</p>
-          </div>      
+            {!token && (
+              <a
+                className="href-button"
+                href={`${authEndpoint}?client_id=${clientID}&redirect_uri=${redirectUri}&scope=${scope}&response_type=${responseType}`}>
+                Login to Spotify
+              </a>
+            )}
+            <p id="login-text">
+              (You need Spotify Premium subscription to proceed)
+            </p>
+          </div>
         </div>
-      )
+      );
     }
     case "index": {
       return (
-        <div className="index">  
+        <>
           <header className="index-header">
             <div className="name">
               <SpotifyLogo diameter="40px" />
               <h1 id="title-1">Partify.</h1>
             </div>
             <div className="menu">
-              <button className="menu-button" onClick={logout}>Logout</button>
+              <button className="menu-button" onClick={logout}>
+                Logout
+              </button>
             </div>
-          </header> 
+          </header>
           <div id="search">
             <form className="search-form" onSubmit={search}>
-              <input type="text" ref={searchKeyRef} placeholder="Search in Spotify..." />    
+              <input
+                type="text"
+                ref={searchKeyRef}
+                placeholder="Search in Spotify..."
+              />
               <button type={"submit"}>Go</button>
             </form>
           </div>
           <div id="content">
-            <div id="left-content">
-              <div id="left">
-                <CurrentPlayingSong currentSong={actSong} currentPlaylist={actPlaylist}/>
-              </div>
+            <div id="current-information">
+              <CurrentlyPlaying
+                currentSong={actSong}
+                currentPlaylist={actPlaylist}
+              />
               <Queue queue={queue} />
             </div>
-            <div className="song-item-container">
-              {renderSongs()}
-            </div>
+            <div id="search-result-container">{renderSongs()}</div>
           </div>
-        </div>
-      )
+        </>
+      );
     }
     default: {
-      return(
+      return (
         <div className="failToLoad">
           <p>Failed to load!</p>
         </div>
-      )
+      );
     }
   }
 }
