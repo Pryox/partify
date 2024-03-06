@@ -1,0 +1,15 @@
+.song-item-container {
+    max-width: 100%;
+    max-height: calc(100% - 3rem);
+    padding: 0.4rem;
+    height: fit-content;
+    display: grid;
+    gap: 10px;
+    overflow-x: auto;
+    scrollbar-width: thin;
+}
+
+#loading {
+    margin-left: 10px;
+    margin-top: 30px;
+}
