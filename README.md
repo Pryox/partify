@@ -1,3 +1,12 @@
+# `npm run dev`
+
+Runs the app in the development mode at [http://localhost:5173](http://localhost:5173)
+
+## `npm run build`
+
+Builds the app for production to the `build` folder
+
+
 # React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
