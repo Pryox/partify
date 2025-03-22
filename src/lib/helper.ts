@@ -33,16 +33,6 @@ export function generateRandomString(length: number) {
   return text;
 }
 
-export function getCodeVerifier() {
-  let codeVerifier = window.localStorage.getItem('code_verifier');
-
-  if (!codeVerifier) {
-    codeVerifier = generateRandomString(64);
-    window.localStorage.setItem('code_verifier', codeVerifier);
-  }
-  return codeVerifier;
-}
-
 /**
  * Checks if current environment is 'Production'
  * @returns 'true' if environment is 'Production', otherwise 'false'

@@ -7,13 +7,12 @@ export function Login(props: LoginProps) {
 
   const authEndpoint = 'https://accounts.spotify.com/authorize';
   const clientID = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
-  const codeChallenge = Helper.base64encode(Helper.encryptSha256(Helper.getCodeVerifier()));
-  const codeChallengeMethod = 'S256';
   const redirectUri = `${Helper.isProductionEnv() ? import.meta.env.VITE_PROD_APPLICATION_URL : import.meta.env.VITE_DEV_APPLICATION_URL}`;
   const responseType = 'code';
   const scope = 'user-read-currently-playing user-read-playback-state user-modify-playback-state';
+  const state = Helper.generateRandomString(16);
 
-  const loginUrl = `${authEndpoint}?client_id=${clientID}&response_type=${responseType}&redirect_uri=${redirectUri}&scope=${scope}&code_challenge_method=${codeChallengeMethod}&code_challenge=${codeChallenge}`;
+  const loginUrl = `${authEndpoint}?client_id=${clientID}&response_type=${responseType}&redirect_uri=${redirectUri}&state=${state}&scope=${scope}`;
 
   return (
     <div className="">
