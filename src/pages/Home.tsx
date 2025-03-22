@@ -6,12 +6,12 @@ export function Home(props: HomeProps) {
   const {} = props;
 
   // State Definitions
-  const [token, setToken] = useState<string | null>(null);
+  const [token, setToken] = useState<string>('');
 
   // Side Effects
   useEffect(() => {
     const hash = window.location.hash;
-    let token = window.localStorage.getItem('token');
+    let token = window.localStorage.getItem('token') ?? '';
 
     if (!token && hash) {
       token =
