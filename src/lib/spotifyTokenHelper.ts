@@ -35,3 +35,36 @@ export async function getAccessToken(authorizationCode: string) {
   }
   return null;
 }
+
+/**
+ * Refreshes the access token using the refresh token
+ * @param refreshToken The refresh token from the previous step
+ * @returns An AccessTokenResponse containing the new access data
+ */
+export async function refreshAccessToken(refreshToken: string) {
+  const clientId = import.meta.env.VITE_SPOTIFY_CLIENT_ID as string;
+  const clientSecret = import.meta.env.VITE_SPOTIFY_CLIENT_SECRET as string;
+  const encodedCredentials = btoa(`${clientId}:${clientSecret}`);
+
+  const headers = {
+    'Content-Type': 'application/x-www-form-urlencoded',
+    Authorization: `Basic ${encodedCredentials}`
+  };
+
+  const body = new URLSearchParams();
+  body.append('grant_type', 'refresh_token');
+  body.append('refresh_token', refreshToken);
+
+  const url = 'https://accounts.spotify.com/api/token';
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: headers,
+    body: body.toString()
+  });
+
+  if (response.status === 200) {
+    const result = await response?.json();
+    return (result as AccessTokenResponse) ?? null;
+  }
+  return null;
+}
