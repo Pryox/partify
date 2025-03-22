@@ -19,7 +19,7 @@ export function Home(props: HomeProps) {
           .substring(1)
           .split('&')
           .find((element) => element.startsWith('access_token'))
-          ?.split('=')?.[1] ?? null;
+          ?.split('=')?.[1] ?? '';
 
       window.location.hash = '';
       window.localStorage.setItem('token', token);
