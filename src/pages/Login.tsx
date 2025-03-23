@@ -21,7 +21,7 @@ export function Login(props: LoginProps) {
         style={{ filter: 'drop-shadow(5px 5px 10px #000000)' }}
       >
         <h1 className="text-6xl font-bold">Partify.</h1>
-        <button className="bg-[#18ac4d] hover:bg-[#1bc456] mt-14 h-16 rounded-full duration-100 hover:cursor-pointer">
+        <button className="bg-[#18ac4d] hover:bg-[#169b45] mt-14 h-16 rounded-full duration-100 hover:cursor-pointer">
           <a href={loginUrl} className="mx-10 font-bold">
             Login to Spotify
           </a>

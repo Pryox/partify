@@ -41,12 +41,3 @@ export function isProductionEnv() {
   const envName = import.meta.env.VITE_ENV;
   return envName === 'PROD';
 }
-
-/**
- * Sets the application into timeout
- * @param ms Duration of timeout
- * @returns Promise which resolves after timeout ended
- */
-export function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
