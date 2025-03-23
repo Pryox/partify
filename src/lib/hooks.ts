@@ -13,19 +13,22 @@ export function useSpotifyToken() {
   // Side Effects
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
+    const state = window.localStorage.getItem('state');
     let authorizationCode = null;
 
-    if (urlParams.has('code')) {
+    if (urlParams.has('code') && urlParams.has('state') && state === urlParams.get('state')) {
       authorizationCode = urlParams.get('code');
+      window.localStorage.removeItem('state');
       window.history.replaceState({}, document.title, window.location.pathname);
     }
 
     let accessToken = window.localStorage.getItem('access_token');
+    const codeVerifier = window.localStorage.getItem('code_verifier');
 
     if (accessToken) {
       setToken(accessToken);
-    } else if (authorizationCode) {
-      SpotifyTokenHelper.getAccessToken(authorizationCode).then((result) => {
+    } else if (authorizationCode && codeVerifier) {
+      SpotifyTokenHelper.getAccessToken(authorizationCode, codeVerifier).then((result) => {
         if (result) {
           accessToken = result.access_token;
           window.localStorage.setItem('refresh_token', result.refresh_token);
@@ -61,6 +64,7 @@ export function useSpotifyToken() {
   const resetToken = () => {
     window.localStorage.removeItem('access_token');
     window.localStorage.removeItem('refresh_token');
+    window.localStorage.removeItem('code_verifier');
 
     setExpiresIn(null);
     setToken(null);

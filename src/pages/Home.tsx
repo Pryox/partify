@@ -33,15 +33,17 @@ export function Home(props: Readonly<HomeProps>) {
 
   return (
     <div className="h-full w-full bg-[#161616]">
-      <header className="text-white flex flex-row h-20 bg-stone-800 p-2">
-        <div className="flex flex-row gap-2">
+      <header className="text-white flex flex-row h-20 bg-stone-800 py-2 px-4">
+        <div className="flex flex-row gap-2 justify-center items-center">
           <SpotifyLogo diameter={45} />
-          <h1 className="text-4xl font-bold">Partify.</h1>
+          <h1 className="text-4xl font-bold h-11">Partify.</h1>
         </div>
         <Group justify="flex-end" className="w-full">
           <p className={`${token ? 'text-green-600' : 'text-red-500'}`}>Token: {token ? 'Available' : 'Unavailable'}</p>
-          <Button variant="gradient" gradient={{ from: '#18ac4d', to: 'teal', deg: 155 }} radius="xl">
-            <NavLink to="/login">Login</NavLink>
+          <Button variant="gradient" gradient={{ from: '#18ac4d', to: 'teal', deg: 155 }} radius="xl" style={{ padding: '0' }}>
+            <NavLink to="/login" className="h-full flex items-center justify-center px-5">
+              Login
+            </NavLink>
           </Button>
           <Button variant="outline" color="#18ac4d" radius="xl" onClick={handleLogout}>
             Logout

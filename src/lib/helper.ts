@@ -1,21 +1,24 @@
-import CryptoJS from 'crypto-js';
+import { enc, SHA256 } from 'crypto-js';
 
 /**
- * Encodes a string into Base64
- * @param input The string to encode
- * @returns The encoded Base64 string
+ * Generates a sha256 hashed, base64 encoded code challenge from the code verifier
+ * @param codeVerifier The code verifier input string
+ * @returns The code challenge string
  */
-export function base64encode(input: string) {
-  return btoa(input).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+export function generateCodeChallenge(codeVerifier: string) {
+  const hash = SHA256(codeVerifier);
+  const hashed = hash.toString(enc.Base64).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  return hashed;
 }
 
 /**
- * Encrypts a given string with the Sha256 algorithm
- * @param input Input string to hash
- * @returns Hashed input string
+ * Generates a 64 character random string and saves it in the local storage
+ * @returns The 64 character codeVerifier string
  */
-export function encryptSha256(input: string) {
-  return CryptoJS.SHA256(input).toString(CryptoJS.enc.Hex);
+export function generateCodeVerifier() {
+  const codeVerifier = generateRandomString(64);
+  window.localStorage.setItem('code_verifier', codeVerifier);
+  return codeVerifier;
 }
 
 /**
@@ -31,6 +34,16 @@ export function generateRandomString(length: number) {
     text += possible.charAt(Math.floor(Math.random() * possible.length));
   }
   return text;
+}
+
+/**
+ * Generates a 16 character random string and saves it in the local storage
+ * @returns The 16 character state string
+ */
+export function generateState() {
+  const state = generateRandomString(16);
+  window.localStorage.setItem('state', state);
+  return state;
 }
 
 /**
