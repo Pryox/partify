@@ -4,12 +4,14 @@ import { Home } from './pages/Home';
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route index element={<Home />} />
-      </Routes>
-    </BrowserRouter>
+    <div className="h-screen w-full">
+      <BrowserRouter>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route index element={<Home />} />
+        </Routes>
+      </BrowserRouter>
+    </div>
   );
 }
 

@@ -12,6 +12,7 @@ export function Home(props: HomeProps) {
 
   // State Definitions
   const [token, setToken] = useState<string | null>(null);
+  const [expiresIn, setExpiresIn] = useState<number | null>(null);
 
   // Side Effects
   useEffect(() => {
@@ -31,29 +32,53 @@ export function Home(props: HomeProps) {
       SpotifyTokenHelper.getAccessToken(authorizationCode).then((result) => {
         if (result) {
           accessToken = result.access_token;
-          const refreshToken = result.refresh_token;
-          console.log(result);
-
-          window.localStorage.setItem('refresh_token', refreshToken);
+          window.localStorage.setItem('refresh_token', result.refresh_token);
           window.localStorage.setItem('access_token', accessToken);
+
+          setExpiresIn(result.expires_in);
           setToken(accessToken);
         }
       });
     }
   }, []);
 
+  useEffect(() => {
+    if (!token || !expiresIn) return;
+    const timer = setTimeout(() => {
+      const refreshToken = window.localStorage.getItem('refresh_token');
+      if (refreshToken) {
+        SpotifyTokenHelper.refreshAccessToken(refreshToken).then((result) => {
+          if (result) {
+            const newAccessToken = result.access_token;
+
+            window.localStorage.setItem('access_token', newAccessToken);
+            setExpiresIn(result.expires_in);
+            setToken(newAccessToken);
+          }
+        });
+      }
+    }, (expiresIn - 60) * 1000);
+
+    return () => clearTimeout(timer);
+  }, [token, expiresIn]);
+
   // Event Handler
   const handleLogout = () => {
     window.localStorage.removeItem('access_token');
+    window.localStorage.removeItem('refresh_token');
+    setToken(null);
   };
 
   return (
-    <div className="h-8 w-full bg-green-300">
+    <div className="h-full w-full bg-green-300">
       <p>This Site contains Home</p>
       <button onClick={handleLogout} className="hover:cursor-pointer">
         Logout
       </button>
       <NavLink to="/login">Login</NavLink>
+      <button onClick={() => console.log(token)} className="hover:cursor-pointer">
+        Log Token
+      </button>
     </div>
   );
 }
