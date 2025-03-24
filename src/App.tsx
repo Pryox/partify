@@ -3,6 +3,7 @@ import { Login } from './pages/Login';
 import { Home } from './pages/Home';
 import { MantineProvider } from '@mantine/core';
 import '@mantine/core/styles.css';
+import '@mantine/notifications/styles.css';
 
 function App() {
   const REFRESH_INTERVAL = 2500;
