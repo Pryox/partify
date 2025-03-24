@@ -26,7 +26,8 @@ export default tseslint.config(
       '@typescript-eslint/no-explicit-any': ['off'],
       'prefer-const': ['warn'],
       'no-empty': ['warn'],
-      'no-extra-boolean-cast': ['warn']
+      'no-extra-boolean-cast': ['warn'],
+      'no-constant-binary-expression': ['warn']
     }
   }
 );

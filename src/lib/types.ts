@@ -5,3 +5,8 @@ export type AccessTokenResponse = {
   expires_in: number;
   refresh_token: string;
 };
+
+export type CurrentlyPlayingResponse = {
+  song: SpotifyApi.TrackObjectFull | null;
+  playlist: SpotifyApi.SinglePlaylistResponse | null;
+};
