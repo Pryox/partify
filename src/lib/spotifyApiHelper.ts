@@ -1,5 +1,5 @@
 import SpotifyWebApi from 'spotify-web-api-js';
-import { CurrentlyPlayingResponse } from './types';
+import { CurrentlyPlayingResponse, QueueResponse } from './types';
 
 const spotifyWebApi = new SpotifyWebApi();
 
@@ -34,4 +34,21 @@ export async function getPlaylist(token: string, playlistId?: string) {
   spotifyWebApi.setAccessToken(token);
   const result = await spotifyWebApi.getPlaylist(playlistId);
   return result;
+}
+
+export async function getCurrentQueue(token: string) {
+  const url = 'https://api.spotify.com/v1/me/player/queue';
+  const payload = {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  };
+
+  const response = await fetch(url, payload);
+  if (response.status === 200) {
+    const result: QueueResponse = await response.json();
+    return result;
+  }
+  return null;
 }

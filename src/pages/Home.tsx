@@ -9,7 +9,7 @@ import { SongItem } from '../components/SongItem';
 import { SongItemType } from '../lib/enums';
 import * as SpotifyApiHelper from '../lib/spotifyApiHelper';
 import { PlaylistItem } from '../components/PlaylistItem';
-import { CurrentlyPlayingResponse } from '../lib/types';
+import { CurrentlyPlayingResponse, QueueResponse } from '../lib/types';
 
 export type HomeProps = {
   refreshInterval: number;
@@ -22,14 +22,20 @@ export function Home(props: Readonly<HomeProps>) {
 
   // State Definitions
   const [currentlyPlaying, setCurrentlyPlaying] = useState<CurrentlyPlayingResponse | null>(null);
+  const [queue, setQueue] = useState<QueueResponse | null>(null);
   const [userData, setUserData] = useState<SpotifyApi.CurrentUsersProfileResponse | null>(null);
 
   // Side Effects
   useEffect(() => {
     if (!token) return;
     const interval = setInterval(() => {
-      SpotifyApiHelper.getCurrentlyPlaying(token).then((result) => setCurrentlyPlaying(result));
-      SpotifyApiHelper.getMe(token).then((result) => setUserData(result));
+      Promise.all([SpotifyApiHelper.getCurrentlyPlaying(token), SpotifyApiHelper.getMe(token), SpotifyApiHelper.getCurrentQueue(token)]).then(
+        ([currentlyPlayingResult, userDataResult, queueResult]) => {
+          setCurrentlyPlaying(currentlyPlayingResult);
+          setUserData(userDataResult);
+          setQueue(queueResult);
+        }
+      );
     }, refreshInterval);
 
     return () => clearInterval(interval);
@@ -55,14 +61,13 @@ export function Home(props: Readonly<HomeProps>) {
   };
 
   return (
-    <div className="h-full w-full bg-[#161616]">
-      <header className="text-white flex flex-row h-20 bg-black py-2 px-4 shadow-black shadow-md">
+    <div className="flex flex-col h-screen w-full bg-[#161616]">
+      <header className="text-white flex flex-row h-20 py-2 px-4 border-b border-stone-600">
         <div className="flex flex-row gap-2 justify-center items-center">
           <SpotifyLogo diameter={45} />
           <h1 className="text-4xl font-bold h-11">Partify.</h1>
         </div>
         <Group justify="flex-end" className="w-full">
-          <p className={`${token ? 'text-green-600' : 'text-red-500'}`}>Token: {token ? 'Available' : 'Unavailable'}</p>
           {!token ? (
             <Button variant="gradient" gradient={{ from: '#18ac4d', to: 'teal', deg: 155 }} radius="xl" style={{ padding: '0' }}>
               <NavLink to="/login" className="h-full flex items-center justify-center px-5">
@@ -71,26 +76,44 @@ export function Home(props: Readonly<HomeProps>) {
             </Button>
           ) : (
             <button
-              className="flex flex-row items-center justify-center gap-2 border border-stone-100 rounded-full p-0.5 pl-3 hover:cursor-pointer"
+              className="flex flex-row items-center justify-center gap-2 border border-stone-100 rounded-full p-0.5 hover:cursor-pointer"
               onClick={handleLogout}
             >
-              <p className="font-bold text-stone-100 mb-0.5">{userData?.display_name ?? ''}</p>
+              <p className="font-bold text-stone-100 mb-0.5 ml-3">{userData?.display_name ?? ''}</p>
               <Avatar variant="outline" radius="xl" src={userData?.images?.[0].url} />
             </button>
           )}
         </Group>
       </header>
-      <div className="p-4 w-full flex flex-col gap-4 text-stone-200">
-        {currentlyPlaying?.song && (
-          <div style={{ filter: 'drop-shadow(2px 2px 5px #000000)' }} className="p-4 bg-[#1A202C] rounded-2xl flex flex-col gap-3">
-            <div className="flex flex-row gap-2 mb-2">
-              <SpotifyLogo diameter={30} />
-              <h3 className="font-bold text-xl">Now playing</h3>
+      <div className="p-4 w-full flex flex-col gap-4 text-stone-200 h-full">
+        {token &&
+          (currentlyPlaying?.song ? (
+            <>
+              <div style={{ filter: 'drop-shadow(2px 2px 5px #000000)' }} className="p-4 bg-[#1A202C] rounded-2xl flex flex-col gap-3 h-fit">
+                <div className="flex flex-row gap-2 mb-2">
+                  <SpotifyLogo diameter={30} />
+                  <h3 className="font-bold text-xl">Now playing</h3>
+                </div>
+                <SongItem song={currentlyPlaying.song} type={SongItemType.Player} />
+                {currentlyPlaying.playlist && <PlaylistItem playlist={currentlyPlaying.playlist} />}
+              </div>
+              {queue && (
+                <div
+                  style={{ filter: 'drop-shadow(2px 2px 5px #000000)' }}
+                  className="p-4 bg-[#1A202C] rounded-2xl flex flex-col gap-3 overflow-scroll h-1/2"
+                >
+                  <h3 className="font-bold text-xl">Next Songs in the Queue:</h3>
+                  {queue.queue.map((queueItem, i) => (
+                    <SongItem key={i} song={queueItem as SpotifyApi.TrackObjectFull} type={SongItemType.Queue} />
+                  ))}
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="flex items-center justify-center h-full">
+              <p className="text-3xl font-medium">Loading...</p>
             </div>
-            <SongItem onEnqueue={handleEnqueue} song={currentlyPlaying.song} type={SongItemType.Player} />
-            {currentlyPlaying.playlist && <PlaylistItem playlist={currentlyPlaying.playlist} />}
-          </div>
-        )}
+          ))}
       </div>
     </div>
   );
