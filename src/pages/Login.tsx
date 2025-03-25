@@ -11,7 +11,7 @@ export function Login(props: LoginProps) {
   const codeChallenge = Helper.generateCodeChallenge(Helper.generateCodeVerifier());
   const redirectUri = `${Helper.isProductionEnv() ? import.meta.env.VITE_PROD_APPLICATION_URL : import.meta.env.VITE_DEV_APPLICATION_URL}`;
   const responseType = 'code';
-  const scope = 'user-read-currently-playing user-read-playback-state user-modify-playback-state';
+  const scope = 'user-read-currently-playing user-read-playback-state user-modify-playback-state ';
   const state = Helper.generateState();
 
   const loginUrl = `${authEndpoint}?client_id=${clientID}&response_type=${responseType}&redirect_uri=${redirectUri}&state=${state}&scope=${scope}&code_challenge_method=S256&code_challenge=${codeChallenge}`;

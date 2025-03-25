@@ -2,7 +2,7 @@ import { NavLink } from 'react-router-dom';
 import { useSpotifyToken } from '../hooks/useSpotifyToken';
 import { useEffect, useState } from 'react';
 import SpotifyLogo from '../assets/SpotifyLogo';
-import { Button, Group } from '@mantine/core';
+import { Avatar, Button, Group } from '@mantine/core';
 import { IconCheck } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import { SongItem } from '../components/SongItem';
@@ -22,14 +22,14 @@ export function Home(props: Readonly<HomeProps>) {
 
   // State Definitions
   const [currentlyPlaying, setCurrentlyPlaying] = useState<CurrentlyPlayingResponse | null>(null);
+  const [userData, setUserData] = useState<SpotifyApi.CurrentUsersProfileResponse | null>(null);
 
   // Side Effects
   useEffect(() => {
     if (!token) return;
     const interval = setInterval(() => {
-      SpotifyApiHelper.getCurrentlyPlaying(token).then((result) => {
-        setCurrentlyPlaying(result);
-      });
+      SpotifyApiHelper.getCurrentlyPlaying(token).then((result) => setCurrentlyPlaying(result));
+      SpotifyApiHelper.getMe(token).then((result) => setUserData(result));
     }, refreshInterval);
 
     return () => clearInterval(interval);
@@ -56,7 +56,7 @@ export function Home(props: Readonly<HomeProps>) {
 
   return (
     <div className="h-full w-full bg-[#161616]">
-      <header className="text-white flex flex-row h-20 bg-stone-800 py-2 px-4 shadow-black shadow-md">
+      <header className="text-white flex flex-row h-20 bg-black py-2 px-4 shadow-black shadow-md">
         <div className="flex flex-row gap-2 justify-center items-center">
           <SpotifyLogo diameter={45} />
           <h1 className="text-4xl font-bold h-11">Partify.</h1>
@@ -70,9 +70,13 @@ export function Home(props: Readonly<HomeProps>) {
               </NavLink>
             </Button>
           ) : (
-            <Button variant="outline" color="#18ac4d" radius="xl" onClick={handleLogout}>
-              Logout
-            </Button>
+            <button
+              className="flex flex-row items-center justify-center gap-2 border border-stone-100 rounded-full p-0.5 pl-3 hover:cursor-pointer"
+              onClick={handleLogout}
+            >
+              <p className="font-bold text-stone-100 mb-0.5">{userData?.display_name ?? ''}</p>
+              <Avatar variant="outline" radius="xl" src={userData?.images?.[0].url} />
+            </button>
           )}
         </Group>
       </header>

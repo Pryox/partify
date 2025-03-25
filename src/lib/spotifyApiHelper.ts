@@ -22,6 +22,12 @@ export async function getCurrentlyPlaying(token: string) {
   return output;
 }
 
+export async function getMe(token: string) {
+  spotifyWebApi.setAccessToken(token);
+  const result = await spotifyWebApi.getMe();
+  return result;
+}
+
 export async function getPlaylist(token: string, playlistId?: string) {
   if (!playlistId) return null;
 
