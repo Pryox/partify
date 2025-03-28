@@ -10,14 +10,16 @@ const spotifyWebApi = new SpotifyWebApi();
  */
 export async function getCurrentlyPlaying(token: string) {
   spotifyWebApi.setAccessToken(token);
-  const result = await spotifyWebApi.getMyCurrentPlayingTrack();
+  const queueResult = await getCurrentQueue(token);
+  const currentlyPlayingResult = await spotifyWebApi.getMyCurrentPlayingTrack();
 
-  const playlistId = result.context?.uri?.split(':')[2];
+  const playlistId = currentlyPlayingResult.context?.uri?.split(':')[2];
   const playlist = await getPlaylist(token, playlistId);
 
   const output: CurrentlyPlayingResponse = {
-    song: result.item,
-    playlist: playlist
+    song: currentlyPlayingResult.item,
+    playlist: playlist,
+    queue: queueResult?.queue || null
   };
   return output;
 }

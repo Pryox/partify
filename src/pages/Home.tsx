@@ -9,7 +9,7 @@ import { SongItem } from '../components/SongItem';
 import { SongItemType } from '../lib/enums';
 import * as SpotifyApiHelper from '../lib/spotifyApiHelper';
 import { PlaylistItem } from '../components/PlaylistItem';
-import { CurrentlyPlayingResponse, QueueResponse } from '../lib/types';
+import { CurrentlyPlayingResponse } from '../lib/types';
 
 export type HomeProps = {
   refreshInterval: number;
@@ -22,24 +22,27 @@ export function Home(props: Readonly<HomeProps>) {
 
   // State Definitions
   const [currentlyPlaying, setCurrentlyPlaying] = useState<CurrentlyPlayingResponse | null>(null);
-  const [queue, setQueue] = useState<QueueResponse | null>(null);
   const [userData, setUserData] = useState<SpotifyApi.CurrentUsersProfileResponse | null>(null);
 
   // Side Effects
   useEffect(() => {
-    if (!token) return;
+    fetchSpotifyData(token);
     const interval = setInterval(() => {
-      Promise.all([SpotifyApiHelper.getCurrentlyPlaying(token), SpotifyApiHelper.getMe(token), SpotifyApiHelper.getCurrentQueue(token)]).then(
-        ([currentlyPlayingResult, userDataResult, queueResult]) => {
-          setCurrentlyPlaying(currentlyPlayingResult);
-          setUserData(userDataResult);
-          setQueue(queueResult);
-        }
-      );
+      fetchSpotifyData(token);
     }, refreshInterval);
 
     return () => clearInterval(interval);
   });
+
+  // Functions
+  const fetchSpotifyData = (token: string | null) => {
+    if (!token) return;
+
+    Promise.all([SpotifyApiHelper.getCurrentlyPlaying(token), SpotifyApiHelper.getMe(token)]).then(([currentlyPlayingResult, userDataResult]) => {
+      setCurrentlyPlaying(currentlyPlayingResult);
+      setUserData(userDataResult);
+    });
+  };
 
   // Event Handler
   const handleEnqueue = (id: string) => {
@@ -61,7 +64,7 @@ export function Home(props: Readonly<HomeProps>) {
   };
 
   return (
-    <div className="flex flex-col h-screen w-full bg-[#161616]">
+    <div className="flex flex-col h-screen w-full bg-[#161616] max-h-screen">
       <header className="text-white flex flex-row h-20 py-2 px-4 border-b border-stone-600">
         <div className="flex flex-row gap-2 justify-center items-center">
           <SpotifyLogo diameter={45} />
@@ -79,7 +82,7 @@ export function Home(props: Readonly<HomeProps>) {
               className="flex flex-row items-center justify-center gap-2 border border-stone-100 rounded-full p-0.5 hover:cursor-pointer"
               onClick={handleLogout}
             >
-              <p className="font-bold text-stone-100 mb-0.5 ml-3">{userData?.display_name ?? ''}</p>
+              {userData && <p className="font-bold text-stone-100 mb-0.5 ml-3">{userData?.display_name ?? ''}</p>}
               <Avatar variant="outline" radius="xl" src={userData?.images?.[0].url} />
             </button>
           )}
@@ -97,13 +100,13 @@ export function Home(props: Readonly<HomeProps>) {
                 <SongItem song={currentlyPlaying.song} type={SongItemType.Player} />
                 {currentlyPlaying.playlist && <PlaylistItem playlist={currentlyPlaying.playlist} />}
               </div>
-              {queue && (
+              {currentlyPlaying?.queue && (
                 <div
                   style={{ filter: 'drop-shadow(2px 2px 5px #000000)' }}
                   className="p-4 bg-[#1A202C] rounded-2xl flex flex-col gap-3 overflow-scroll h-1/2"
                 >
                   <h3 className="font-bold text-xl">Next Songs in the Queue:</h3>
-                  {queue.queue.map((queueItem, i) => (
+                  {currentlyPlaying.queue.map((queueItem, i) => (
                     <SongItem key={i} song={queueItem as SpotifyApi.TrackObjectFull} type={SongItemType.Queue} />
                   ))}
                 </div>

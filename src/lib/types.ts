@@ -7,11 +7,12 @@ export type AccessTokenResponse = {
 };
 
 export type CurrentlyPlayingResponse = {
-  song: SpotifyApi.TrackObjectFull | null;
+  song: SpotifyApi.TrackObjectFull | SpotifyApi.EpisodeObjectFull | null;
   playlist: SpotifyApi.SinglePlaylistResponse | null;
+  queue: SpotifyApi.TrackObjectFull[] | SpotifyApi.EpisodeObjectFull[] | null;
 };
 
 export type QueueResponse = {
-  currently_playing: SpotifyApi.TrackObjectFull | SpotifyApi.EpisodeObjectFull | null;
+  item: SpotifyApi.TrackObjectFull | SpotifyApi.EpisodeObjectFull | null;
   queue: SpotifyApi.TrackObjectFull[] | SpotifyApi.EpisodeObjectFull[];
 };
