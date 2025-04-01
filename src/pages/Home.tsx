@@ -88,32 +88,34 @@ export function Home(props: Readonly<HomeProps>) {
           )}
         </Group>
       </header>
-      <div className="p-4 w-full flex flex-col gap-4 text-stone-200 h-full">
+      <div className="p-4 w-full flex flex-row gap-4 text-stone-200 h-full overflow-hidden">
         {token &&
           (currentlyPlaying?.song ? (
-            <>
+            <div className="w-1/2 flex flex-col gap-4">
               <div style={{ filter: 'drop-shadow(2px 2px 5px #000000)' }} className="p-4 bg-[#1A202C] rounded-2xl flex flex-col gap-3 h-fit">
                 <div className="flex flex-row gap-2 mb-2">
                   <SpotifyLogo diameter={30} />
                   <h3 className="font-bold text-xl">Now playing</h3>
                 </div>
-                <SongItem song={currentlyPlaying.song} type={SongItemType.Player} />
+                <SongItem song={currentlyPlaying.song as SpotifyApi.TrackObjectFull} type={SongItemType.Player} />
                 {currentlyPlaying.playlist && <PlaylistItem playlist={currentlyPlaying.playlist} />}
               </div>
               {currentlyPlaying?.queue && (
                 <div
                   style={{ filter: 'drop-shadow(2px 2px 5px #000000)' }}
-                  className="p-4 bg-[#1A202C] rounded-2xl flex flex-col gap-3 overflow-scroll h-1/2"
+                  className="p-4 bg-[#1A202C] rounded-2xl flex flex-col gap-3 grow overflow-x-hidden"
                 >
                   <h3 className="font-bold text-xl">Next Songs in the Queue:</h3>
-                  {currentlyPlaying.queue.map((queueItem, i) => (
-                    <SongItem key={i} song={queueItem as SpotifyApi.TrackObjectFull} type={SongItemType.Queue} />
-                  ))}
+                  <div style={{ scrollbarWidth: 'thin', msScrollbarBaseColor: 'transparent' }} className="flex flex-col gap-3 overflow-y-auto">
+                    {currentlyPlaying.queue.map((queueItem, i) => (
+                      <SongItem key={i} song={queueItem as SpotifyApi.TrackObjectFull} type={SongItemType.Queue} />
+                    ))}
+                  </div>
                 </div>
               )}
-            </>
+            </div>
           ) : (
-            <div className="flex items-center justify-center h-full">
+            <div className="flex items-center justify-center h-full w-full">
               <p className="text-3xl font-medium">Loading...</p>
             </div>
           ))}
