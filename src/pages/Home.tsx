@@ -70,7 +70,7 @@ export function Home(props: Readonly<HomeProps>) {
           <SpotifyLogo diameter={45} />
           <h1 className="text-4xl font-bold h-11">Partify.</h1>
         </div>
-        <Group justify="flex-end" className="w-full">
+        <Group justify="flex-end" gap="xl" className="w-full">
           {!token ? (
             <Button variant="gradient" gradient={{ from: '#18ac4d', to: 'teal', deg: 155 }} radius="xl" style={{ padding: '0' }}>
               <NavLink to="/login" className="h-full flex items-center justify-center px-5">
@@ -78,13 +78,18 @@ export function Home(props: Readonly<HomeProps>) {
               </NavLink>
             </Button>
           ) : (
-            <button
-              className="flex flex-row items-center justify-center gap-2 border border-stone-100 rounded-full p-0.5 hover:cursor-pointer"
-              onClick={handleLogout}
-            >
-              {userData && <p className="font-bold text-stone-100 mb-0.5 ml-3">{userData?.display_name ?? ''}</p>}
-              <Avatar variant="outline" radius="xl" src={userData?.images?.[0].url} />
-            </button>
+            <>
+              <a href="https://open.spotify.com" target="_blank" className="underline text-[#18ac4d] hover:text-[#40e479]">
+                Open Spotify
+              </a>
+              <button
+                className="flex flex-row items-center justify-center gap-2 border border-stone-100 rounded-full p-0.5 hover:cursor-pointer"
+                onClick={handleLogout}
+              >
+                {userData && <p className="font-bold text-stone-100 mb-0.5 ml-3">{userData?.display_name ?? ''}</p>}
+                <Avatar variant="outline" radius="xl" src={userData?.images?.[0].url} />
+              </button>
+            </>
           )}
         </Group>
       </header>
@@ -106,7 +111,7 @@ export function Home(props: Readonly<HomeProps>) {
                   className="p-4 bg-[#1A202C] rounded-2xl flex flex-col gap-3 grow overflow-x-hidden"
                 >
                   <h3 className="font-bold text-xl">Next Songs in the Queue:</h3>
-                  <div style={{ scrollbarWidth: 'thin', msScrollbarBaseColor: 'transparent' }} className="flex flex-col gap-3 overflow-y-auto">
+                  <div style={{ scrollbarColor: 'yellow', scrollbarWidth: 'thin' }} className="flex flex-col gap-3 overflow-y-auto">
                     {currentlyPlaying.queue.map((queueItem, i) => (
                       <SongItem key={i} song={queueItem as SpotifyApi.TrackObjectFull} type={SongItemType.Queue} />
                     ))}
