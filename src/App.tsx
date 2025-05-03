@@ -7,7 +7,7 @@ import '@mantine/notifications/styles.css';
 import { Notifications } from '@mantine/notifications';
 
 function App() {
-  const REFRESH_INTERVAL = 1500;
+  const REFRESH_INTERVAL = 2500;
 
   return (
     <div className="h-screen w-full">

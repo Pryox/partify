@@ -6,7 +6,7 @@ const spotifyWebApi = new SpotifyWebApi();
 /**
  * Returns a Promise with the currently playing song in the spotify player
  * @param token Your access token
- * @returns A Promise with the currently playing song in the spotify player
+ * @returns A Promise with the currently playing song, playlist and queue in the spotify player
  */
 export async function getCurrentlyPlaying(token: string) {
   spotifyWebApi.setAccessToken(token);
@@ -24,6 +24,11 @@ export async function getCurrentlyPlaying(token: string) {
   return output;
 }
 
+/**
+ * Returns a Promise with the current logged in users profile
+ * @param token Your access token
+ * @returns Promise of user profile
+ */
 export async function getMe(token: string) {
   spotifyWebApi.setAccessToken(token);
   const result = await spotifyWebApi.getMe();
@@ -53,4 +58,16 @@ export async function getCurrentQueue(token: string) {
     return result;
   }
   return null;
+}
+
+export async function search(token: string, query: string) {
+  if (!query) return null;
+
+  spotifyWebApi.setAccessToken(token);
+  const options: SpotifyApi.SearchForItemParameterObject = {
+    limit: 20
+  };
+
+  const result = await spotifyWebApi.search(query, ['track'], options);
+  return result;
 }

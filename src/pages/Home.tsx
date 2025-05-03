@@ -2,7 +2,7 @@ import { NavLink } from 'react-router-dom';
 import { useSpotifyToken } from '../hooks/useSpotifyToken';
 import { useEffect, useState } from 'react';
 import SpotifyLogo from '../assets/SpotifyLogo';
-import { Avatar, Button, Group } from '@mantine/core';
+import { Avatar, Button, Group, TextInput } from '@mantine/core';
 import { IconCheck } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import { SongItem } from '../components/SongItem';
@@ -23,6 +23,7 @@ export function Home(props: Readonly<HomeProps>) {
   // State Definitions
   const [currentlyPlaying, setCurrentlyPlaying] = useState<CurrentlyPlayingResponse | null>(null);
   const [userData, setUserData] = useState<SpotifyApi.CurrentUsersProfileResponse | null>(null);
+  const [searchResult, setSearchResult] = useState<SpotifyApi.SearchResponse | null>(null);
 
   // Side Effects
   useEffect(() => {
@@ -35,13 +36,13 @@ export function Home(props: Readonly<HomeProps>) {
   });
 
   // Functions
-  const fetchSpotifyData = (token: string | null) => {
+  const fetchSpotifyData = async (token: string | null) => {
     if (!token) return;
 
-    Promise.all([SpotifyApiHelper.getCurrentlyPlaying(token), SpotifyApiHelper.getMe(token)]).then(([currentlyPlayingResult, userDataResult]) => {
-      setCurrentlyPlaying(currentlyPlayingResult);
-      setUserData(userDataResult);
-    });
+    const currentlyPlayingResult = await SpotifyApiHelper.getCurrentlyPlaying(token);
+    const userDataResult = await SpotifyApiHelper.getMe(token);
+    setCurrentlyPlaying(currentlyPlayingResult);
+    setUserData(userDataResult);
   };
 
   // Event Handler
@@ -66,10 +67,11 @@ export function Home(props: Readonly<HomeProps>) {
   return (
     <div className="flex flex-col h-screen w-full bg-[#161616] max-h-screen">
       <header className="text-white flex flex-row h-20 py-2 px-4 border-b border-stone-600">
-        <div className="flex flex-row gap-2 justify-center items-center">
+        <div className="flex flex-row gap-3 justify-center items-center">
           <SpotifyLogo diameter={45} />
           <h1 className="text-4xl font-bold h-11">Partify.</h1>
         </div>
+        <div></div>
         <Group justify="flex-end" gap="xl" className="w-full">
           {!token ? (
             <Button variant="gradient" gradient={{ from: '#18ac4d', to: 'teal', deg: 155 }} radius="xl" style={{ padding: '0' }}>
@@ -79,7 +81,7 @@ export function Home(props: Readonly<HomeProps>) {
             </Button>
           ) : (
             <>
-              <a href="https://open.spotify.com" target="_blank" className="underline text-[#18ac4d] hover:text-[#40e479]">
+              <a href="https://open.spotify.com" target="_blank" className="hover:underline text-[#18ac4d] hover:text-[#40e479]">
                 Open Spotify
               </a>
               <button
@@ -96,7 +98,7 @@ export function Home(props: Readonly<HomeProps>) {
       <div className="p-4 w-full flex flex-row gap-4 text-stone-200 h-full overflow-hidden">
         {token &&
           (currentlyPlaying?.song ? (
-            <div className="w-1/2 flex flex-col gap-4">
+            <div className={`${searchResult ? 'w-1/2' : 'w-full'} flex flex-col gap-4`}>
               <div style={{ filter: 'drop-shadow(2px 2px 5px #000000)' }} className="p-4 bg-[#1A202C] rounded-2xl flex flex-col gap-3 h-fit">
                 <div className="flex flex-row gap-2 mb-2">
                   <SpotifyLogo diameter={30} />
@@ -111,7 +113,7 @@ export function Home(props: Readonly<HomeProps>) {
                   className="p-4 bg-[#1A202C] rounded-2xl flex flex-col gap-3 grow overflow-x-hidden"
                 >
                   <h3 className="font-bold text-xl">Next Songs in the Queue:</h3>
-                  <div style={{ scrollbarColor: 'yellow', scrollbarWidth: 'thin' }} className="flex flex-col gap-3 overflow-y-auto">
+                  <div className="scrollbar-thin scrollbar-track-[#1A202C] scrollbar-thumb-[#4B4B4B] flex flex-col gap-3 overflow-y-auto pr-1">
                     {currentlyPlaying.queue.map((queueItem, i) => (
                       <SongItem key={i} song={queueItem as SpotifyApi.TrackObjectFull} type={SongItemType.Queue} />
                     ))}
