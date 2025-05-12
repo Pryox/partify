@@ -21,6 +21,7 @@ export function SongItem(props: Readonly<SongItemProps>) {
     if (onEnqueue) onEnqueue(song.id);
   };
 
+  //TODO: ImageFit bei mehrzeiligem Text fixen
   return (
     <div className="w-full h-fit rounded-2xl border border-stone-600 flex flex-row gap-3 px-3.5 py-3">
       <img alt="Song Cover" src={song.album.images?.[0]?.url ?? ''} width="64" height="64" />
