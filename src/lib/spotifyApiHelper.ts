@@ -88,5 +88,5 @@ export async function addToQueue(token: string, trackId: string) {
   };
 
   const response = await fetch(url, payload);
-  return response.status === 204;
+  return response.status === 200;
 }

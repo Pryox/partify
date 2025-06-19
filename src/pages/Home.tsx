@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import { useSpotifyToken } from '../hooks/useSpotifyToken';
-import { useEffect, useState } from 'react';
+import { useSpotifyApi } from '../hooks/useSpotifyApi';
+import { useState } from 'react';
 import SpotifyLogo from '../assets/SpotifyLogo';
 import { Avatar, Button, Group, TextInput } from '@mantine/core';
 import { IconCheck, IconSearch, IconPlus } from '@tabler/icons-react';
@@ -10,7 +11,6 @@ import { SongItemType } from '../lib/enums';
 import * as SpotifyApiHelper from '../lib/spotifyApiHelper';
 import { PlaylistItem } from '../components/PlaylistItem';
 import { HomePage } from '../components/HomePage';
-import { CurrentlyPlayingResponse } from '../lib/types';
 
 export type HomeProps = {
   refreshInterval: number;
@@ -21,34 +21,22 @@ export function Home(props: Readonly<HomeProps>) {
 
   const { token, resetToken } = useSpotifyToken();
 
+  const API_CONFIG = {
+    queueRefreshInterval: refreshInterval,
+    userDataRefreshInterval: 20000,
+    searchDebounceMs: 500
+  };
+
+  const { currentlyPlaying, userData, searchResult, performSearch, clearSearch } = useSpotifyApi({
+    token,
+    ...API_CONFIG
+  });
+
   // State Definitions
-  const [currentlyPlaying, setCurrentlyPlaying] = useState<CurrentlyPlayingResponse | null>(null);
-  const [userData, setUserData] = useState<SpotifyApi.CurrentUsersProfileResponse | null>(null);
-  const [searchResult, setSearchResult] = useState<SpotifyApi.SearchResponse | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [showSearchResults, setShowSearchResults] = useState<boolean>(false);
 
-  // Side Effects
-  useEffect(() => {
-    fetchSpotifyData(token);
-    const interval = setInterval(() => {
-      fetchSpotifyData(token);
-    }, refreshInterval);
-
-    return () => clearInterval(interval);
-  });
-
-  // Functions
-  const fetchSpotifyData = async (token: string | null) => {
-    if (!token) return;
-
-    const currentlyPlayingResult = await SpotifyApiHelper.getCurrentlyPlaying(token);
-    const userDataResult = await SpotifyApiHelper.getMe(token);
-    setCurrentlyPlaying(currentlyPlayingResult);
-    setUserData(userDataResult);
-  };
-
-  // Event Handler
+  // Event Handlers
   const handleEnqueue = async (id: string) => {
     if (!token) return;
 
@@ -85,8 +73,10 @@ export function Home(props: Readonly<HomeProps>) {
   };
 
   const handleLogout = () => {
-    setCurrentlyPlaying(null);
     resetToken();
+    clearSearch();
+    setSearchQuery('');
+    setShowSearchResults(false);
 
     notifications.show({
       autoClose: 4000,
@@ -98,16 +88,18 @@ export function Home(props: Readonly<HomeProps>) {
     });
   };
 
-  const handleSearch = async (query: string) => {
+  // Optimized search handler with debouncing
+  const handleSearch = (query: string) => {
     setSearchQuery(query);
-    if (!token || !query.trim()) {
-      setSearchResult(null);
+
+    if (!query.trim()) {
+      clearSearch();
       setShowSearchResults(false);
       return;
     }
 
-    const result = await SpotifyApiHelper.search(token, query);
-    setSearchResult(result);
+    // Use debounced search from the hook
+    performSearch(query);
     setShowSearchResults(true);
   };
 
