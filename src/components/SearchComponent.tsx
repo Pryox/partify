@@ -47,37 +47,44 @@ export function SearchComponent({ searchResult, performSearch, clearSearch, onEn
         onChange={(event) => handleSearch(event.currentTarget.value)}
         onFocus={handleSearchFocus}
         onBlur={handleSearchBlur}
-        leftSection={<IconSearch size={16} color="#161616" />}
+        leftSection={<IconSearch size={16} color="#6a6a6a" />}
         radius="xl"
         className="w-full"
         styles={{
           input: {
-            backgroundColor: '#18ac4d',
-            borderColor: '#4B4B4B',
-            color: 'white',
+            backgroundColor: '#181818',
+            borderColor: '#404040',
+            color: '#ffffff',
             '&:focus': {
-              borderColor: '#18ac4d'
+              borderColor: '#1DB954',
+              backgroundColor: '#181818'
+            },
+            '&::placeholder': {
+              color: '#b3b3b3'
             }
           }
         }}
       />
 
       {showSearchResults && searchResult?.tracks?.items && searchResult.tracks.items.length > 0 && (
-        <div className="scrollbar-thin scrollbar-track-[#1A202C] scrollbar-thumb-[#4B4B4B] absolute top-full left-0 right-0 mt-2 bg-[#1A202C] border border-[#4B4B4B] rounded-xl shadow-lg z-50 max-h-96 overflow-y-auto">
+        <div className="scrollbar-thin scrollbar-track-[#181818] scrollbar-thumb-[#535353] hover:scrollbar-thumb-[#6a6a6a] absolute top-full left-0 right-0 mt-2 bg-[#181818] border border-[#404040] rounded-xl shadow-2xl z-50 max-h-96 overflow-y-auto">
           {searchResult.tracks.items.map((track) => (
-            <div key={track.id} className="flex items-center gap-3 p-3 hover:bg-[#2D3748] border-b border-[#4B4B4B] last:border-b-0">
+            <div
+              key={track.id}
+              className="flex items-center gap-3 p-3 hover:bg-[#282828] border-b border-[#404040] last:border-b-0 transition-colors"
+            >
               <img
                 src={track.album.images[2]?.url || track.album.images[1]?.url || track.album.images[0]?.url}
                 alt={track.album.name}
                 className="w-12 h-12 rounded"
               />
               <div className="flex-1 min-w-0">
-                <p className="text-white font-medium truncate">{track.name}</p>
-                <p className="text-stone-400 text-sm truncate">{track.artists.map((artist) => artist.name).join(', ')}</p>
+                <p className="text-[#ffffff] font-medium truncate">{track.name}</p>
+                <p className="text-[#b3b3b3] text-sm truncate">{track.artists.map((artist) => artist.name).join(', ')}</p>
               </div>
               <button
                 onClick={() => onEnqueue(track.id)}
-                className="flex items-center justify-center w-8 h-8 bg-[#18ac4d] hover:bg-[#40e479] rounded-full transition-colors cursor-pointer"
+                className="flex items-center justify-center w-8 h-8 bg-[#1DB954] hover:bg-[#1ed760] active:bg-[#169c46] rounded-full transition-colors cursor-pointer"
               >
                 <IconPlus size={16} className="text-white" />
               </button>
