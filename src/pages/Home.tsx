@@ -33,8 +33,6 @@ export function Home(props: Readonly<HomeProps>) {
     ...API_CONFIG
   });
 
-  // State Definitions
-
   // Event Handlers
   const handleEnqueue = async (id: string) => {
     if (!token) return;
@@ -43,7 +41,6 @@ export function Home(props: Readonly<HomeProps>) {
       const success = await SpotifyApiHelper.addToQueue(token, id);
 
       if (success) {
-        // Immediately refresh the queue to show the newly added song
         refreshQueue();
 
         notifications.show({
