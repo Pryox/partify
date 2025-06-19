@@ -139,7 +139,7 @@ export function Home(props: Readonly<HomeProps>) {
                 >
                   <h3 className="font-bold text-xl">Next Songs in the Queue:</h3>
                   <div className="scrollbar-thin scrollbar-track-[#181818] scrollbar-thumb-[#535353] hover:scrollbar-thumb-[#6a6a6a] flex flex-col gap-3 overflow-y-auto pr-1">
-                    {currentlyPlaying.queue.map((queueItem, i) => (
+                    {currentlyPlaying.queue.map((queueItem: any, i: number) => (
                       <SongItem key={i} song={queueItem as SpotifyApi.TrackObjectFull} type={SongItemType.Queue} />
                     ))}
                   </div>
