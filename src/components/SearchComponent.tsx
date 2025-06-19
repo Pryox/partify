@@ -45,7 +45,6 @@ export function SearchComponent({ searchResult, performSearch, clearSearch, onEn
     clearSearch();
   };
 
-  // Touch event handlers for better tablet experience
   const handleTouchStart = (trackId: string) => {
     setTouchedItem(trackId);
   };
