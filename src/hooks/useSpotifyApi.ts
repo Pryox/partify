@@ -22,17 +22,14 @@ interface UseSpotifyApiReturn {
  * Implements separation of concerns by handling different data types with appropriate refresh rates
  */
 export function useSpotifyApi({ token, queueRefreshInterval, userDataRefreshInterval, searchDebounceMs }: UseSpotifyApiProps): UseSpotifyApiReturn {
-  // State management following single responsibility principle
   const [currentlyPlaying, setCurrentlyPlaying] = useState<CurrentlyPlayingResponse | null>(null);
   const [userData, setUserData] = useState<SpotifyApi.CurrentUsersProfileResponse | null>(null);
   const [searchResult, setSearchResult] = useState<SpotifyApi.SearchResponse | null>(null);
 
-  // Refs for managing intervals and debouncing
   const queueIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const userDataIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Queue and currently playing data fetcher - optimized for frequent updates
   const fetchQueueData = useCallback(async (accessToken: string) => {
     try {
       const result = await SpotifyApiHelper.getCurrentlyPlaying(accessToken);
@@ -42,7 +39,6 @@ export function useSpotifyApi({ token, queueRefreshInterval, userDataRefreshInte
     }
   }, []);
 
-  // User data fetcher - optimized for infrequent updates
   const fetchUserData = useCallback(async (accessToken: string) => {
     try {
       const result = await SpotifyApiHelper.getMe(accessToken);
@@ -52,10 +48,8 @@ export function useSpotifyApi({ token, queueRefreshInterval, userDataRefreshInte
     }
   }, []);
 
-  // Debounced search implementation following the Command pattern
   const performSearch = useCallback(
     (query: string) => {
-      // Clear existing timeout to implement debouncing
       if (searchTimeoutRef.current) {
         clearTimeout(searchTimeoutRef.current);
       }
@@ -85,7 +79,6 @@ export function useSpotifyApi({ token, queueRefreshInterval, userDataRefreshInte
     }
   }, []);
 
-  // Effect for managing queue data intervals
   useEffect(() => {
     if (!token) {
       setCurrentlyPlaying(null);
@@ -95,10 +88,8 @@ export function useSpotifyApi({ token, queueRefreshInterval, userDataRefreshInte
       return;
     }
 
-    // Initial fetch
     fetchQueueData(token);
 
-    // Set up interval for queue data
     queueIntervalRef.current = setInterval(() => {
       fetchQueueData(token);
     }, queueRefreshInterval);
@@ -110,7 +101,6 @@ export function useSpotifyApi({ token, queueRefreshInterval, userDataRefreshInte
     };
   }, [token, queueRefreshInterval, fetchQueueData]);
 
-  // Effect for managing user data intervals
   useEffect(() => {
     if (!token) {
       setUserData(null);
@@ -120,10 +110,8 @@ export function useSpotifyApi({ token, queueRefreshInterval, userDataRefreshInte
       return;
     }
 
-    // Initial fetch
     fetchUserData(token);
 
-    // Set up interval for user data
     userDataIntervalRef.current = setInterval(() => {
       fetchUserData(token);
     }, userDataRefreshInterval);
@@ -135,7 +123,6 @@ export function useSpotifyApi({ token, queueRefreshInterval, userDataRefreshInte
     };
   }, [token, userDataRefreshInterval, fetchUserData]);
 
-  // Cleanup effect for search timeout
   useEffect(() => {
     return () => {
       if (searchTimeoutRef.current) {
