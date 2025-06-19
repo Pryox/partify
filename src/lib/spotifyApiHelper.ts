@@ -71,3 +71,22 @@ export async function search(token: string, query: string) {
   const result = await spotifyWebApi.search(query, ['track'], options);
   return result;
 }
+
+export async function addToQueue(token: string, trackId: string) {
+  if (!trackId || !token) return false;
+
+  spotifyWebApi.setAccessToken(token);
+  const uri = `spotify:track:${trackId}`;
+  const url = `https://api.spotify.com/v1/me/player/queue?uri=${encodeURIComponent(uri)}`;
+
+  const payload = {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+  };
+
+  const response = await fetch(url, payload);
+  return response.status === 204;
+}
