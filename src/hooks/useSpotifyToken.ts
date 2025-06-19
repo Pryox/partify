@@ -22,7 +22,7 @@ export function useSpotifyToken() {
       window.history.replaceState({}, document.title, window.location.pathname);
     }
 
-    let accessToken = window.localStorage.getItem('access_token');
+    let accessToken = window.localStorage.getItem('access_token') ?? '';
     const codeVerifier = window.localStorage.getItem('code_verifier');
 
     if (accessToken) {
