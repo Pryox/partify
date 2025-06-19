@@ -1,11 +1,7 @@
 import { Button } from '@mantine/core';
 import * as Helper from '../lib/helper';
 
-export type LoginProps = {};
-
-export function Login(props: LoginProps) {
-  const {} = props;
-
+export function Login() {
   const authEndpoint = 'https://accounts.spotify.com/authorize';
   const clientID = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
   const codeChallenge = Helper.generateCodeChallenge(Helper.generateCodeVerifier());
