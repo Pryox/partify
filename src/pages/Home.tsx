@@ -1,16 +1,17 @@
 import { NavLink } from 'react-router-dom';
 import { useSpotifyToken } from '../hooks/useSpotifyToken';
 import { useSpotifyApi } from '../hooks/useSpotifyApi';
-import { useState } from 'react';
 import SpotifyLogo from '../assets/SpotifyLogo';
-import { Avatar, Button, Group, TextInput } from '@mantine/core';
-import { IconCheck, IconSearch, IconPlus } from '@tabler/icons-react';
+import { Button, Group } from '@mantine/core';
+import { IconCheck } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import { SongItem } from '../components/SongItem';
 import { SongItemType } from '../lib/enums';
 import * as SpotifyApiHelper from '../lib/spotifyApiHelper';
 import { PlaylistItem } from '../components/PlaylistItem';
 import { HomePage } from '../components/HomePage';
+import { ProfileMenu } from '../components/ProfileMenu';
+import { SearchComponent } from '../components/SearchComponent';
 
 export type HomeProps = {
   refreshInterval: number;
@@ -23,18 +24,16 @@ export function Home(props: Readonly<HomeProps>) {
 
   const API_CONFIG = {
     queueRefreshInterval: refreshInterval,
-    userDataRefreshInterval: 20000,
-    searchDebounceMs: 500
+    userDataRefreshInterval: 60000,
+    searchDebounceMs: 400
   };
 
-  const { currentlyPlaying, userData, searchResult, performSearch, clearSearch } = useSpotifyApi({
+  const { currentlyPlaying, userData, searchResult, performSearch, clearSearch, refreshQueue } = useSpotifyApi({
     token,
     ...API_CONFIG
   });
 
   // State Definitions
-  const [searchQuery, setSearchQuery] = useState<string>('');
-  const [showSearchResults, setShowSearchResults] = useState<boolean>(false);
 
   // Event Handlers
   const handleEnqueue = async (id: string) => {
@@ -44,6 +43,9 @@ export function Home(props: Readonly<HomeProps>) {
       const success = await SpotifyApiHelper.addToQueue(token, id);
 
       if (success) {
+        // Immediately refresh the queue to show the newly added song
+        refreshQueue();
+
         notifications.show({
           autoClose: 3000,
           color: '#18ac4d',
@@ -75,8 +77,6 @@ export function Home(props: Readonly<HomeProps>) {
   const handleLogout = () => {
     resetToken();
     clearSearch();
-    setSearchQuery('');
-    setShowSearchResults(false);
 
     notifications.show({
       autoClose: 4000,
@@ -88,34 +88,6 @@ export function Home(props: Readonly<HomeProps>) {
     });
   };
 
-  // Optimized search handler with debouncing
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-
-    if (!query.trim()) {
-      clearSearch();
-      setShowSearchResults(false);
-      return;
-    }
-
-    // Use debounced search from the hook
-    performSearch(query);
-    setShowSearchResults(true);
-  };
-
-  const handleSearchFocus = () => {
-    if (searchResult && searchQuery.trim()) {
-      setShowSearchResults(true);
-    }
-  };
-
-  const handleSearchBlur = () => {
-    setTimeout(() => {
-      setShowSearchResults(false);
-    }, 200);
-  };
-
-  // TODO: logout menu
   return (
     <div className="flex flex-col h-screen w-full bg-[#161616] max-h-screen">
       <header className="text-white flex flex-row h-20 py-2 px-4 border-b border-stone-600 relative">
@@ -126,52 +98,7 @@ export function Home(props: Readonly<HomeProps>) {
 
         {token && (
           <div className="flex-1 flex justify-center items-center mx-8 relative">
-            <div className="relative w-full max-w-md">
-              <TextInput
-                placeholder="Search for Songs..."
-                value={searchQuery}
-                onChange={(event) => handleSearch(event.currentTarget.value)}
-                onFocus={handleSearchFocus}
-                onBlur={handleSearchBlur}
-                leftSection={<IconSearch size={16} color="#161616" />}
-                radius="xl"
-                className="w-full"
-                styles={{
-                  input: {
-                    backgroundColor: '#18ac4d',
-                    borderColor: '#4B4B4B',
-                    color: 'white',
-                    '&:focus': {
-                      borderColor: '#18ac4d'
-                    }
-                  }
-                }}
-              />
-
-              {showSearchResults && searchResult?.tracks?.items && searchResult.tracks.items.length > 0 && (
-                <div className="scrollbar-thin scrollbar-track-[#1A202C] scrollbar-thumb-[#4B4B4B] absolute top-full left-0 right-0 mt-2 bg-[#1A202C] border border-[#4B4B4B] rounded-xl shadow-lg z-50 max-h-96 overflow-y-auto">
-                  {searchResult.tracks.items.map((track) => (
-                    <div key={track.id} className="flex items-center gap-3 p-3 hover:bg-[#2D3748] border-b border-[#4B4B4B] last:border-b-0">
-                      <img
-                        src={track.album.images[2]?.url || track.album.images[1]?.url || track.album.images[0]?.url}
-                        alt={track.album.name}
-                        className="w-12 h-12 rounded"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-white font-medium truncate">{track.name}</p>
-                        <p className="text-stone-400 text-sm truncate">{track.artists.map((artist) => artist.name).join(', ')}</p>
-                      </div>
-                      <button
-                        onClick={() => handleEnqueue(track.id)}
-                        className="flex items-center justify-center w-8 h-8 bg-[#18ac4d] hover:bg-[#40e479] rounded-full transition-colors cursor-pointer"
-                      >
-                        <IconPlus size={16} className="text-white" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            <SearchComponent searchResult={searchResult} performSearch={performSearch} clearSearch={clearSearch} onEnqueue={handleEnqueue} />
           </div>
         )}
 
@@ -186,13 +113,7 @@ export function Home(props: Readonly<HomeProps>) {
               </NavLink>
             </Button>
           ) : (
-            <button
-              className="flex flex-row items-center justify-center gap-2 border border-stone-100 rounded-full p-0.5 hover:cursor-pointer"
-              onClick={handleLogout}
-            >
-              {userData && <p className="font-bold text-stone-100 mb-0.5 ml-3">{userData?.display_name ?? ''}</p>}
-              <Avatar variant="outline" radius="xl" src={userData?.images?.[0].url} />
-            </button>
+            <ProfileMenu userData={userData} onLogout={handleLogout} />
           )}
         </Group>
       </header>

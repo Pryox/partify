@@ -15,6 +15,7 @@ interface UseSpotifyApiReturn {
   searchResult: SpotifyApi.SearchResponse | null;
   performSearch: (query: string) => void;
   clearSearch: () => void;
+  refreshQueue: () => void;
 }
 
 /**
@@ -79,6 +80,12 @@ export function useSpotifyApi({ token, queueRefreshInterval, userDataRefreshInte
     }
   }, []);
 
+  const refreshQueue = useCallback(() => {
+    if (token) {
+      fetchQueueData(token);
+    }
+  }, [token, fetchQueueData]);
+
   useEffect(() => {
     if (!token) {
       setCurrentlyPlaying(null);
@@ -136,6 +143,7 @@ export function useSpotifyApi({ token, queueRefreshInterval, userDataRefreshInte
     userData,
     searchResult,
     performSearch,
-    clearSearch
+    clearSearch,
+    refreshQueue
   };
 }
