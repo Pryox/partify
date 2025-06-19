@@ -7,7 +7,7 @@ export function PlaylistItem(props: Readonly<PlaylistItemProps>) {
 
   return (
     <div className="w-full h-fit rounded-2xl border border-stone-600 flex flex-row gap-3 px-3.5 py-3">
-      <img alt="Song Cover" src={playlist.images?.[0]?.url ?? ''} width="64" height="64" />
+      <img alt="Song Cover" src={playlist.images?.[0]?.url ?? ''} className="w-16 h-16 object-cover flex-shrink-0 rounded" />
       <div className="w-full flex flex-col gap-2 pt-1">
         <div className="flex flex-row gap-3 items-center">
           <img alt="Playlist Icon" src="../../public/playlist.png" width="15" height="15" />
